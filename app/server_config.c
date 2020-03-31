@@ -471,19 +471,15 @@ void acnf_setAppSerialKind(ACPL *item, HardwareSerial *serial){srvc_setAppSerial
 
 ACPLCommandNode acnodes[] = {
 	{CMD_SET_CHANNEL_GOAL,				&acnf_setGoal},
+	{CMD_GET_ID_EXISTS,					&acnf_getExists},
 	{CMD_GET_CHANNEL_FTS,				&acnf_getFTS},
 	{CMD_GETR_CHANNEL_STATE,			&acnf_getStateStr},
 	{CMD_GETR_CHANNEL_ERROR,			&acnf_getErrorStr},
 	{CMD_GETR_SEC_STATE,				&acnf_getSecureStateStr},
-	{CMD_GET_ID_EXISTS,					&acnf_getExists},
 	
 	{CMD_CHANNEL_START,					&acnf_start},
 	{CMD_CHANNEL_STOP,					&acnf_stop},
 	{CMD_CHANNEL_RELOAD,				&acnf_reload},
-	
-	{CMD_GET_CHANNEL_GOAL,				&acnf_getGoal},
-	{CMD_GETR_CHANNEL_GOAL,				&acnf_getrGoal},
-	
 	
 #ifdef SERIAL_INTERFACE_FULL
 
@@ -551,6 +547,8 @@ ACPLCommandNode acnodes[] = {
 	{CMD_GET_APP_SERIAL_KIND,			&acnf_getAppSerialKind}
 #endif
 
+	{CMD_GET_CHANNEL_GOAL,				&acnf_getGoal},
+	{CMD_GETR_CHANNEL_GOAL,				&acnf_getrGoal}
 };
 
 #define ACPL_CNODE_COUNT (sizeof acnodes / sizeof acnodes[0])

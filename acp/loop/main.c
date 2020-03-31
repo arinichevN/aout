@@ -4,7 +4,7 @@
 #define ACPL_BUF_LEN item->len
 #define ACPL_BUF_PUSH(V) ACPL_BUF[ACPL_BUF_LEN] = (char) V; ACPL_BUF_LEN++;
 
-#define ACPL_CHECK_BUF_LEN if (ACPL_BUF_LEN >= (ACP_BUF_MAX_LENGTH - 2)) {return ACP_ERROR_BUFFER_OVERFLOW;}
+#define ACPL_CHECK_BUF_LEN if (ACPL_BUF_LEN >= (ACP_BUF_MAX_LENGTH - 3)) {return ACP_ERROR_BUFFER_OVERFLOW;}
 #define ACPL_READ_CHAR int c = serial->read(); if (c == -1) {return ACP_BUSY; }
 
 #define ACPL_CHECK_BUSY_TIME if (ton(&item->busy_tmr)) {return ACP_BUSY;}

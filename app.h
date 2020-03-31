@@ -24,7 +24,7 @@
  * -user_config:
  * set output mode (OUT_PWM or OUT_SERVO expected):
  */
-#define OUTPUT_MODE OUT_SERVO 
+#define OUTPUT_MODE OUT_PWM 
 
 /*
  * -user_config:
@@ -33,7 +33,7 @@
  * default settings, and you will be able to get and set only main parameters, 
  * but this will reduce memory usage.
  */
-#define SERIAL_INTERFACE_FULL
+//#define SERIAL_INTERFACE_FULL
 
 /*
  * -user_config:
@@ -48,7 +48,7 @@
  * -user_config:
  * uncomment the following line if you need debug messages:
  */
-#define MODE_DEBUG
+//#define MODE_DEBUG
 
 
 #endif 

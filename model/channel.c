@@ -130,9 +130,9 @@ int channels_begin(ChannelLList *channels, int default_btn){
 	 * SET_CHANNEL_PIN(pin)
 	 * for each channel:
 	 */
-	SET_CHANNEL_PIN(2)
-	SET_CHANNEL_PIN(3)
-	SET_CHANNEL_PIN(7)
+	SET_CHANNEL_PIN(9)
+	SET_CHANNEL_PIN(10)
+	SET_CHANNEL_PIN(11)
 	
 	if(chn != NULL){
 		printd("number of calles of SET_CHANNEL_PARAM() should be equal to CHANNEL_COUNT");
