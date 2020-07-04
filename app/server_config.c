@@ -247,6 +247,8 @@ void acnf_setId(ACPL *item, HardwareSerial *serial){srvc_setChannelParamI(item, 
 
 void acnf_getGoal(ACPL *item, HardwareSerial *serial){srvc_getChannelParamF(item, &channel_getGoal);}
 
+void acnf_getDeviceKind(ACPL *item, HardwareSerial *serial){fgetChannelPmemParamI(item, &PMEMCHANNEL_GET_FIELD_FUNC(device_kind));}
+void acnf_getrDeviceKind(ACPL *item, HardwareSerial *serial){srvc_getChannelParamI(item, &channel_getDeviceKind);}
 
 #if OUTPUT_MODE == OUT_PWM
 void acnf_setPWMResolution(ACPL *item, HardwareSerial *serial){srvc_setChannelParamUl(item, &PMEMCHANNEL_SET_FIELD_FUNC(pwm_resolution));}
@@ -483,6 +485,9 @@ ACPLCommandNode acnodes[] = {
 	
 #ifdef SERIAL_INTERFACE_FULL
 
+	{CMD_GET_CHANNEL_DEVICE_KIND,		&acnf_getDeviceKind},
+	{CMD_GETR_CHANNEL_DEVICE_KIND,		&acnf_getrDeviceKind},
+	
 #if OUTPUT_MODE == OUT_PWM
 	{CMD_SET_PWM_RESOLUTION,			&acnf_setPWMResolution},
 	{CMD_SET_PWM_PERIOD,				&acnf_setPWMPeriod},

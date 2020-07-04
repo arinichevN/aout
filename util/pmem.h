@@ -12,6 +12,7 @@
 typedef struct {
 	int id;
     int enable;
+    int device_id;
 #if OUTPUT_MODE == OUT_PWM
 	unsigned long pwm_resolution;
     unsigned long pwm_period;

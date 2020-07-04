@@ -88,6 +88,7 @@ int pmem_hasSpaceForAppConfig(){
 void pmem_toChannel(Channel *channel, PmemChannel *pchannel){
 	channel->id = pchannel->id;
 	channel->enable = pchannel->enable;
+	channel->device_id = pchannel->device_id;
 #if OUTPUT_MODE == OUT_PWM
 	channel->pwm.resolution = pchannel->pwm_resolution;
     channel->pwm.period = pchannel->pwm_period;
@@ -109,6 +110,7 @@ void pmem_toChannel(Channel *channel, PmemChannel *pchannel){
 void pmem_fromChannel(PmemChannel *pchannel, Channel *channel){
 	pchannel->id = channel->id;
 	pchannel->enable = channel->enable;
+	pchannel->device_id = channel->device_id;
 #if OUTPUT_MODE == OUT_PWM
 	pchannel->pwm_resolution = channel->pwm.resolution;
     pchannel->pwm_period = channel->pwm.period;

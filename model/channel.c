@@ -4,25 +4,31 @@ Channel channel_buf[CHANNEL_COUNT];
 
 int channel_check(Channel *item){
 	if(!common_checkBlockStatus(item->enable)){
-		return CHANNEL_ERROR_BLOCK_STATUS;
+		return ERROR_BLOCK_STATUS;
 	}
 	if(!common_checkBlockStatus(item->secure.enable)){
-		return CHANNEL_ERROR_SECURE_BLOCK_STATUS;
+		return ERROR_SECURE_BLOCK_STATUS;
 	}
 #if OUTPUT_MODE == OUT_PWM
+	if(item->device_kind !== DEVICE_KIND_SPWM){
+		return ERROR_DEVICE_KIND;
+	}
 	if(item->pwm.duty_cycle_max < item->pwm.duty_cycle_min){
-		return CHANNEL_ERROR_PWM_DC_MINMAX;
+		return ERROR_PWM;
 	}
 	if(item->pwm.duty_cycle_max > item->pwm.period){
-		return CHANNEL_ERROR_PWM_DCMAX_PERIOD;
+		return ERROR_PWM;
 	}
 #else
 #if OUTPUT_MODE == OUT_SERVO
+	if(item->device_kind !== DEVICE_KIND_HPWM){
+		return ERROR_DEVICE_KIND;
+	}
 	if(item->servo.pw_min > item->servo.pw_max){
-		return CHANNEL_ERROR_SERVO_PW_MINMAX;
+		return ERROR_PWM;
 	}
 	if(item->servo.in_min > item->servo.in_max){
-		return CHANNEL_ERROR_SERVO_IN_MINMAX;
+		return ERROR_PWM;
 	}
 #endif
 #endif
@@ -30,30 +36,31 @@ int channel_check(Channel *item){
 }
 
 const char *channel_getErrorStr(Channel *item){
-	switch(item->error_id){
-		case ERROR_NO:							return "no";
-		case CHANNEL_ERROR_BLOCK_STATUS:		return "Ebs";
-		case CHANNEL_ERROR_SECURE_BLOCK_STATUS:	return "Esbs";
-#if OUTPUT_MODE == OUT_PWM
-		case CHANNEL_ERROR_PWM_DC_MINMAX:		return "Epdmm";
-		case CHANNEL_ERROR_PWM_DCMAX_PERIOD:	return "Epdmp";
-#else
-#if OUTPUT_MODE == OUT_SERVO
-		case CHANNEL_ERROR_SERVO_PW_MINMAX:		return "Espwmm";
-		case CHANNEL_ERROR_SERVO_IN_MINMAX:		return "Esinmm";
-#endif
-#endif
-		case CHANNEL_ERROR_PMEM_READ:			return "Emem";
-	}
-	return "err?";
+	return getErrorStr(item->error_id);
+}
+
+const char *channel_getStateStr(Channel *item){
+	switch(item->state){
+		case RUN:return "RUN";
+		case OFF:return "OFF";
+		case INIT:return "INIT";
+		case FAILURE:return "FAILURE";
+	}	
+	return "?";
+}
+
+int channel_getDeviceKind(Channel *item){
+	return item->device_kind;
 }
 
 void channel_setDefaults(Channel *item, size_t ind){
 #if OUTPUT_MODE == OUT_PWM
 	pwm_setParam (&item->pwm, DEFAULT_PWM_RESOLUTION, DEFAULT_PWM_PERIOD_MS, DEFAULT_PWM_DUTY_CYCLE_MIN_MS, DEFAULT_PWM_DUTY_CYCLE_MAX_MS);
+	item->device_kind = DEVICE_KIND_SPWM;
 #else
 #if OUTPUT_MODE == OUT_SERVO
 	servo_setParam(&item->servo, DEFAULT_SERVO_PW_MIN, DEFAULT_SERVO_PW_MAX, DEFAULT_SERVO_IN_MIN, DEFAULT_SERVO_IN_MAX);
+	item->device_kind = DEVICE_KIND_HPWM;
 #endif
 #endif
 	secure_setParam(&item->secure, DEFAULT_SECURE_TIMEOUT_MS, DEFAULT_SECURE_OUT, DEFAULT_SECURE_ENABLE);
@@ -63,7 +70,7 @@ void channel_setDefaults(Channel *item, size_t ind){
 	item->enable = DEFAULT_CHANNEL_ENABLE;
 }
 
-void channel_setPin(Channel *item, int pin){
+void channel_setStaticParam(Channel *item, int pin){
 #if OUTPUT_MODE == OUT_PWM
 	pwm_setPin(&item->pwm, pin);
 #else
@@ -76,14 +83,16 @@ void channel_setPin(Channel *item, int pin){
 static void channel_setFromNVRAM(Channel *item, size_t ind){
 	if(!pmem_getChannel(item, ind)){
 		printdln("   failed to get channel");
-		item->error_id = CHANNEL_ERROR_PMEM_READ;
+		item->error_id = ERROR_PMEM_READ;
 		return;
 	}
 #if OUTPUT_MODE == OUT_PWM
 	item->goal = 0.0;
+	item->device_kind = DEVICE_KIND_SPWM;
 #else
 #if OUTPUT_MODE == OUT_SERVO
 	item->goal = item->servo.in_min;
+	item->device_kind = DEVICE_KIND_HPWM;
 #endif
 #endif
 	item->ind = ind;
@@ -119,7 +128,7 @@ void channels_buildFromArray(ChannelLList *channels, Channel arr[]){
 	}
 }
 
-#define SET_CHANNEL_PIN(PIN) if(chn != NULL){channel_setPin(chn, PIN);chn = chn->next;} else {printdln("call SET_CHANNEL_PIN for each channel"); return 0;}
+#define SET_CHANNEL_PIN(PIN) if(chn != NULL){channel_setStaticParam(chn, PIN);chn = chn->next;} else {printdln("call SET_CHANNEL_PIN for each channel"); return 0;}
 int channels_begin(ChannelLList *channels, int default_btn){
 	extern Channel channel_buf[CHANNEL_COUNT];
 	channels_buildFromArray(channels, channel_buf);
@@ -127,15 +136,15 @@ int channels_begin(ChannelLList *channels, int default_btn){
 	/*
 	 * -user_config:
 	 * call
-	 * SET_CHANNEL_PIN(pin)
+	 * SET_CHANNEL_STATIC_PARAM(pin)
 	 * for each channel:
 	 */
-	SET_CHANNEL_PIN(9)
-	SET_CHANNEL_PIN(10)
-	SET_CHANNEL_PIN(11)
+	SET_CHANNEL_STATIC_PARAM(9)
+	SET_CHANNEL_STATIC_PARAM(10)
+	SET_CHANNEL_STATIC_PARAM(11)
 	
 	if(chn != NULL){
-		printd("number of calles of SET_CHANNEL_PARAM() should be equal to CHANNEL_COUNT");
+		printd("number of calles of SET_CHANNEL_STATIC_PARAM() should be equal to CHANNEL_COUNT");
 		return 0;
 	}
 	size_t i = 0;
@@ -198,16 +207,6 @@ void channels_stop(ChannelLList *channels){
 	FOREACH_CHANNEL(channels)
 		channel_stop(channel);
 	}
-}
-
-const char *channel_getStateStr(Channel *item){
-	switch(item->state){
-		case RUN:return "RUN";
-		case OFF:return "OFF";
-		case INIT:return "INIT";
-		case FAILURE:return "FAILURE";
-	}	
-	return "?";
 }
 
 void channel_control(Channel *item) {

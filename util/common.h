@@ -62,6 +62,7 @@ enum ErrorE {
 	ERROR_PID_KD,
 	ERROR_POS2_MODE,
 	ERROR_POS2_HYS,
+	ERROR_PWM,
 	ERROR_PMEM_READ,
 	ERROR_READ,
 	ERROR_CHANNELS,
@@ -91,6 +92,15 @@ typedef enum {
 	NO=0,
 	YES=1
 } EnableE;
+
+typedef enum {
+	DEVICE_KIND_UNKNOWN=0,
+	DEVICE_KIND_MAX6675,
+	DEVICE_KIND_MAX31855,
+	DEVICE_KIND_DS18B20,
+	DEVICE_KIND_SPWM,
+	DEVICE_KIND_HPWM
+} DeviceKind;
 
 struct timespec{
 	unsigned long tv_sec;

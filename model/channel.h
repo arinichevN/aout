@@ -44,15 +44,12 @@
 
 	
 enum ChannelErrorE {
-	CHANNEL_ERROR_BLOCK_STATUS = 1,
-	CHANNEL_ERROR_SECURE_BLOCK_STATUS,
-	CHANNEL_ERROR_SUBBLOCK,
-	CHANNEL_ERROR_PMEM_READ,
+
 	CHANNEL_ERROR_PWM_DC_MINMAX,
 	CHANNEL_ERROR_PWM_DCMAX_PERIOD,
 	CHANNEL_ERROR_SERVO_PW_MINMAX,
 	CHANNEL_ERROR_SERVO_IN_MINMAX,
-	CHANNEK_ERROR_COUNT
+
 };
 
 struct channel_st {
@@ -67,6 +64,7 @@ struct channel_st {
 	int id;//for external control
 	size_t ind;//index in array
 	double goal;
+	int device_kind;
 	int error_id;
 	int enable;
 	int state;

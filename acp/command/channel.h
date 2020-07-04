@@ -12,6 +12,10 @@
 #define CMD_GET_CHANNEL_SAVE_GOAL	"gcsgoal"
 #define CMD_GETR_CHANNEL_SAVE_GOAL	"grcsgoal"
 
+#define CMD_SET_CHANNEL_DEVICE_KIND		"scdevk"
+#define CMD_GET_CHANNEL_DEVICE_KIND		"gcdevk"
+#define CMD_GETR_CHANNEL_DEVICE_KIND	"grcdevk"
+
 //======================================================================
 
 #define CMD_GET_CHANNEL_FTS			"gfts"
