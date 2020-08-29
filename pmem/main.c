@@ -1,4 +1,4 @@
-#include "pmem.h"
+#include "main.h"
 
 #define PMEM_APP_SIZE sizeof(AppConfig)
 #define PMEM_CRC_SIZE sizeof(uint8_t)
@@ -88,14 +88,16 @@ int pmem_hasSpaceForAppConfig(){
 void pmem_toChannel(Channel *channel, PmemChannel *pchannel){
 	channel->id = pchannel->id;
 	channel->enable = pchannel->enable;
-	channel->device_id = pchannel->device_id;
+	channel->device_kind = pchannel->device_kind;
 #if OUTPUT_MODE == OUT_PWM
+	pwm_setPin(&channel->pwm, pchannel->pin);
 	channel->pwm.resolution = pchannel->pwm_resolution;
     channel->pwm.period = pchannel->pwm_period;
     channel->pwm.duty_cycle_min = pchannel->pwm_duty_cycle_min; 
     channel->pwm.duty_cycle_max = pchannel->pwm_duty_cycle_max;
 #else
 #if OUTPUT_MODE == OUT_SERVO
+	servo_setPin(&channel->servo, pchannel->pin);
 	channel->servo.pw_min = pchannel->servo_pw_min;
 	channel->servo.pw_max = pchannel->servo_pw_max;
 	channel->servo.in_min = pchannel->servo_in_min;
@@ -110,14 +112,16 @@ void pmem_toChannel(Channel *channel, PmemChannel *pchannel){
 void pmem_fromChannel(PmemChannel *pchannel, Channel *channel){
 	pchannel->id = channel->id;
 	pchannel->enable = channel->enable;
-	pchannel->device_id = channel->device_id;
+	pchannel->device_kind = channel->device_kind;
 #if OUTPUT_MODE == OUT_PWM
+	pchannel->pin = pwm_getPin(&channel->pwm);
 	pchannel->pwm_resolution = channel->pwm.resolution;
     pchannel->pwm_period = channel->pwm.period;
     pchannel->pwm_duty_cycle_min = channel->pwm.duty_cycle_min;  
     pchannel->pwm_duty_cycle_max = channel->pwm.duty_cycle_max;  
 #else
 #if OUTPUT_MODE == OUT_SERVO
+	pchannel->pin = servo_getPin(&channel->servo);
 	pchannel->servo_pw_min = channel->servo.pw_min;
 	pchannel->servo_pw_max = channel->servo.pw_max;
 	pchannel->servo_in_min = channel->servo.in_min;
@@ -217,7 +221,8 @@ int pmem_saveAppConfig(AppConfig *item){
 }
 
 PMEMCHANNEL_DEF_GET_FIELD_FUNC(id, int)
-PMEMCHANNEL_DEF_GET_FIELD_FUNC(enable, unsigned long)
+PMEMCHANNEL_DEF_GET_FIELD_FUNC(enable, int)
+PMEMCHANNEL_DEF_GET_FIELD_FUNC(pin, int)
 
 PMEMCHANNEL_DEF_GET_FIELD_FUNC(secure_enable, int)
 PMEMCHANNEL_DEF_GET_FIELD_FUNC(secure_timeout, unsigned long)
@@ -228,7 +233,7 @@ PMEMCHANNEL_DEF_SET_FIELD_FUNC(secure_out, double)
 
 PMEMCHANNEL_DEF_SET_FIELD_FUNC(id, int)
 PMEMCHANNEL_DEF_SET_FIELD_FUNC(enable, int)
-
+PMEMCHANNEL_DEF_SET_FIELD_FUNC(pin, int)
 
 #if OUTPUT_MODE == OUT_PWM
 PMEMCHANNEL_DEF_SET_FIELD_FUNC(pwm_resolution, unsigned long)

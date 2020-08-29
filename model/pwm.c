@@ -29,6 +29,32 @@ int pwm_setDutyCycle (PWM *item, unsigned long v) {
 	return 1;
 }
 
+void pwm_BUSY (PWM *item, double goal);
+
+void pwm_IDLE (PWM *item, double goal){
+	pwm_setDutyCycle (item, (unsigned long) goal);
+	unsigned long now = millis();
+	if (now > item->toggle_time) {
+	   item->toggle_time = now + item->delay_busy;
+	   if(item->delay_busy > 0){
+		   digitalWrite(item->pin, PWM_PIN_BUSY);
+	   }
+	   item->control = pwm_BUSY;
+	}
+}
+
+void pwm_BUSY (PWM *item, double goal){
+	pwm_setDutyCycle (item, (unsigned long) goal);
+	unsigned long now = millis();
+	if (now > item->toggle_time) {
+	   item->toggle_time = now + item->delay_idle;
+	   if(item->delay_idle > 0){
+		   digitalWrite(item->pin, PWM_PIN_IDLE);
+	   }
+	   item->control = pwm_IDLE;
+	}
+}
+
 void pwm_setParam(PWM *item, unsigned long resolution, unsigned long period, unsigned long duty_cycle_min, unsigned long duty_cycle_max){
 	item->resolution = resolution;
 	item->period = period;
@@ -42,18 +68,22 @@ void pwm_setPin(PWM *item, int pin){
 	digitalWrite(item->pin, PWM_PIN_IDLE);
 }
 
+int pwm_getPin(PWM *item){
+	return item->pin;
+}
+
 void pwm_begin (PWM *item) {
-   item->duty_cycle = 0;
-   unsigned long  now = millis();
-   item->toggle_time = now;
-   pwm_calc_single_time (item);
-   pwm_calc_delays(item);
-   item->state = PWM_IDLE;
+	item->duty_cycle = 0;
+	unsigned long  now = millis();
+	item->toggle_time = now;
+	pwm_calc_single_time (item);
+	pwm_calc_delays(item);
+	item->control = pwm_IDLE;
 }
 
 void pwm_stop(PWM *item){
 	digitalWrite(item->pin, PWM_PIN_IDLE);
-	item->state = PWM_IDLE;
+	item->control = pwm_IDLE;
 }
 
 int pwm_normalizeInput(PWM *item, double *v){
@@ -68,33 +98,33 @@ int pwm_normalizeInput(PWM *item, double *v){
 	return 0;
 }
 
-int pwm_control (PWM *item, double goal) {
-	pwm_setDutyCycle (item, (unsigned long) goal);
-	unsigned long now = millis();
-	switch (item->state) {
-	  case PWM_BUSY: {
-			if (now > item->toggle_time) {
-			   item->toggle_time = now + item->delay_idle;
-			   if(item->delay_idle > 0){
-				   digitalWrite(item->pin, PWM_PIN_IDLE);
-			   }
-			   item->state = PWM_IDLE;
-			}
-			break;
-		 }
-	  case PWM_IDLE: {
-			if (now > item->toggle_time) {
-			   item->toggle_time = now + item->delay_busy;
-			   if(item->delay_busy > 0){
-				   digitalWrite(item->pin, PWM_PIN_BUSY);
-			   }
-			   item->state = PWM_BUSY;
-			}
-			break;
-		 }
-	  default:
-		 item->state = PWM_IDLE;
-		 break;
-	}
-	return item->state;
-}
+//int pwm_control (PWM *item, double goal) {
+	//pwm_setDutyCycle (item, (unsigned long) goal);
+	//unsigned long now = millis();
+	//switch (item->state) {
+	  //case PWM_BUSY: {
+			//if (now > item->toggle_time) {
+			   //item->toggle_time = now + item->delay_idle;
+			   //if(item->delay_idle > 0){
+				   //digitalWrite(item->pin, PWM_PIN_IDLE);
+			   //}
+			   //item->control = pwm_IDLE;
+			//}
+			//break;
+		 //}
+	  //case PWM_IDLE: {
+			//if (now > item->toggle_time) {
+			   //item->toggle_time = now + item->delay_busy;
+			   //if(item->delay_busy > 0){
+				   //digitalWrite(item->pin, PWM_PIN_BUSY);
+			   //}
+			   //item->control = pwm_BUSY;
+			//}
+			//break;
+		 //}
+	  //default:
+		 //item->control = pwm_IDLE;
+		 //break;
+	//}
+	//return item->state;
+//}

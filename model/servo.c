@@ -22,6 +22,10 @@ void servo_setPin(Servow *item, int pin){
 	item->pin = pin;
 }
 
+int servo_getPin(Servow *item){
+	return item->pin;
+}
+
 void servo_begin (Servow *item){
 	item->last_goal = -0.10203;
 	item->device.attach(item->pin);

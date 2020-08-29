@@ -2,17 +2,18 @@
 #define PMEM_H
 
 #include <EEPROM.h>
-#include "crc.h"
+#include "../util/crc.h"
 #include "../app/config.h"
 #include "../app.h"
-#include "../model/channel.h"
+#include "../model/channel/main.h"
 
 
 
 typedef struct {
 	int id;
     int enable;
-    int device_id;
+    int device_kind;
+    int pin;
 #if OUTPUT_MODE == OUT_PWM
 	unsigned long pwm_resolution;
     unsigned long pwm_period;

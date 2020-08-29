@@ -1,5 +1,5 @@
-#ifndef ACP_LOOP_MULTI_H
-#define ACP_LOOP_MULTI_H
+#ifndef ACPL_CLIENT_MULTI_H
+#define ACPL_CLIENT_MULTI_H
 
 /*
  * These functions are intended to be called in loop until they return
@@ -19,21 +19,21 @@
  */
 
 #include "main.h"
+#include "client.h"
 #include "../../util/caller_queue.h"
-//enum ACPLMstateE {
-	//ACPLM_INIT,
-	//ACPLM_READ_ID,
-	//ACPLM_READ_COMMAND,
-	//ACPLM_READ_DATA1,
-	//ACPLM_READ_DATA2,
-	//ACPLM_READ_DATA3,
-	//ACPLM_CHECK_CRC,
-	//ACPLM_SEND_RESPONSE
-//};
 
+typedef struct acplcm_st{
+	ACPLC *acplc;
+	CallerQueue *queue;
+	void (*control) (struct acplcm_st *, HardwareSerial *);
+} ACPLCM;
 
-extern int acplm_sendSIF(ACPL *acpl, CallerQueue *queue, void *caller, const char *cmd, int channel_id, double v);
-extern int acplm_getFTS(ACPL *acpl, CallerQueue *queue, void *caller, const char *cmd, int channel_id, FTS *out);
-extern void acplm_client(ACPL *acpl, CallerQueue *queue, HardwareSerial *serial);
+extern int acplcm_sendII(ACPLCM *item, void *caller, char sign, int cmd, int v);
+extern int acplcm_sendIIF(ACPLCM *item, void *caller, char sign, int cmd, int channel_id, double v);
+extern int acplcm_getFTS(ACPLCM *item, void *caller, int cmd, int channel_id, FTS *out);
+extern int acplcm_getIS(ACPLCM *item, void *caller, int cmd, int channel_id, char *out, size_t slen);
+extern int acplcm_begin(ACPLCM **item);
+extern void acplcm_free(ACPLCM *item);
+extern void acplcm_control(ACPLCM *item, HardwareSerial *serial);
 
 #endif 

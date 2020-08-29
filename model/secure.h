@@ -10,19 +10,17 @@
 
 #include "../util/ton.h"
 #include "../util/common.h"
-#include "../acp/command/secure.h"
+#include "../acp/command/main.h"
 
-struct Secure{
+typedef struct secure_st{
     double out;
     int enable;
 
     Ton tmr;
-    int state;
-};
+    void (*control) (struct secure_st *, double *);
+} Secure;
 
 extern const char *secure_getStateStr(Secure *item);
-
-extern void secure_control (Secure *item, double *v);
 
 extern void secure_begin (Secure *item);
 
@@ -33,5 +31,7 @@ extern void secure_setEnable(Secure *item, int v);
 extern void secure_setParam (Secure *item, unsigned long timeout, double out, int enable);
 
 extern void secure_touch (Secure *item);
+
+#define secure_control(ITEM, V) (ITEM)->control(ITEM, (V))
 
 #endif 
