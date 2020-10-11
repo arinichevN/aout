@@ -21,17 +21,12 @@ typedef struct secure_st{
 } Secure;
 
 extern const char *secure_getStateStr(Secure *item);
-
 extern void secure_begin (Secure *item);
-
 extern void secure_stop (Secure *item) ;
-
 extern void secure_setEnable(Secure *item, int v);
-
 extern void secure_setParam (Secure *item, unsigned long timeout, double out, int enable);
-
 extern void secure_touch (Secure *item);
 
-#define secure_control(ITEM, V) (ITEM)->control(ITEM, (V))
+#define SECURE_CONTROL(ITEM, V) (ITEM)->control(ITEM, (V))
 
 #endif 

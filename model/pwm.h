@@ -19,13 +19,12 @@ typedef struct pwm_st{
     unsigned long duty_cycle;
 } PWM;
 
-
 extern void pwm_setParam(PWM *item, unsigned long resolution, unsigned long period, unsigned long duty_cycle_min, unsigned long duty_cycle_max);
 extern void pwm_setPin(PWM *item, int pin);
 extern int pwm_getPin(PWM *item);
 extern void pwm_begin(PWM *item, int pin);
 extern void pwm_stop(PWM *item);
 extern int pwm_normalizeInput(PWM *item, double *v);
-#define pwm_control(ITEM, GOAL) (ITEM)->control(ITEM, GOAL)
+#define PWM_CONTROL(ITEM, GOAL) (ITEM)->control(ITEM, GOAL)
 
 #endif 
