@@ -134,33 +134,43 @@ void app_begin(){
 		app_error_id = ERROR_PARAM;
 		goto err;
 	}
-	//delay(1000);
+	delay(300);
 	if(!serials_begin(default_btn)){
 		app_error_id = ERROR_SERIAL;
 		goto err;
 	}
-	//delay(1000);
-	channels_begin(default_btn);
-	//delay(1000);
+	printdln("serials OK");
+	delay(300);
+	if(!channels_begin(default_btn)){
+		app_error_id = ERROR_CHANNELS;
+		goto err;
+	}
+	printdln("channels OK");
+	delay(300);
 #ifdef USE_AOIDS
 	if(!aoids_begin()){
 		app_error_id = ERROR_AOID;
 		goto err;
 	}
+	printdln("aoids OK");
+	delay(300);
 #endif
 #ifdef USE_NOIDS
 	if(!noids_begin(default_btn)){
 		app_error_id = ERROR_NOID;
 		goto err;
 	}
+	printdln("noids OK");
+	delay(300);
 #endif
 	app_control = app_RUN;
-	printdln("started");
+	printdln("app started");
 	return;
 	
 	err:
 	appei_control(app_error_id);
 	app_control = app_FAILURE;
+	printdln("app failed");
 }
 
 void app_reset(){

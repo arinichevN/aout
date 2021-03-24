@@ -23,7 +23,7 @@ extern int channels_activeExists();
 
 extern int channels_getIdFirst(int *out);
 
-extern void channels_begin(int default_btn);
+extern int channels_begin(int default_btn);
 
 #ifdef USE_AOIDS
 extern void channels_buildAoids(Aoid *next_oid, Aoid *parent_oid, size_t *id);

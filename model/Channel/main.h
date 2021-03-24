@@ -36,7 +36,6 @@ struct channel_st {
 	dk_t device_kind;
 	double goal;
 	iDevice *device;
-	IdleDevice idev;
 	Secure secure;
 #ifdef USE_AOIDS
 	ChannelAoid aoid;
@@ -52,7 +51,7 @@ struct channel_st {
 
 extern state_t channel_getState(Channel *self);
 extern err_t channel_getError(Channel *self);
-extern void channel_begin(Channel *self, size_t ind);
+extern int channel_begin(Channel *self, size_t ind);
 extern int channel_start(Channel *self);
 extern int channel_stop(Channel *self);
 extern int channel_disconnect(Channel *self);

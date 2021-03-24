@@ -5,6 +5,6 @@ typedef struct {
 	iDevice im_device;
 } IdleDevice;
 
-extern void idev_begin(IdleDevice *self);
+extern void idev_new(IdleDevice *self);
 
 #endif

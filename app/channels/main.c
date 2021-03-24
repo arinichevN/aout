@@ -20,9 +20,9 @@
  * secure_enable}
  */
 const ChannelParam CHANNEL_DEFAULT_PARAMS[] = {
-	{21, 5, DEVICE_KIND_SPWM, {544UL, 2400UL, 0.0, 1000.0}, {1000UL, 5000UL, 0UL, 5000UL}, {0.0, 3000, YES}},
-	{22, 6, DEVICE_KIND_SPWM, {544UL, 2400UL, 0.0, 1000.0}, {1000UL, 5000UL, 0UL, 5000UL}, {0.0, 3000, YES}},
-	{23, 7, DEVICE_KIND_SPWM, {544UL, 2400UL, 0.0, 1000.0}, {1000UL, 5000UL, 0UL, 5000UL}, {0.0, 3000, YES}}
+	{31, 5, DEVICE_KIND_SPWM, {544UL, 2400UL, 0.0, 1000.0}, {1000UL, 5000UL, 0UL, 5000UL}, {0.0, 3000, YES}},
+	{32, 6, DEVICE_KIND_SPWM, {544UL, 2400UL, 0.0, 1000.0}, {1000UL, 5000UL, 0UL, 5000UL}, {0.0, 3000, YES}},
+	{33, 7, DEVICE_KIND_SPWM, {544UL, 2400UL, 0.0, 1000.0}, {1000UL, 5000UL, 0UL, 5000UL}, {0.0, 3000, YES}}
 
 };
 
@@ -40,7 +40,7 @@ int channels_getIdFirst(int *out){
 	return channelLList_getIdFirst(&channels, out);
 }
 
-void channels_begin(int default_btn){
+int channels_begin(int default_btn){
 	LLIST_BUILD_FROM_ARRAY_N(channels, channel_buf, CHANNEL_COUNT)
 	size_t ind = 0;
 	FOREACH_CHANNEL {
@@ -48,8 +48,12 @@ void channels_begin(int default_btn){
 			pmem_saveChannelParam(&CHANNEL_DEFAULT_PARAMS[ind], ind);
 			printd("default param has been saved for channel ind \n"); printdln(ind);
 		}
-		channel_begin(channel, ind); ind++;
+		int r = channel_begin(channel, ind); ind++;
+		if(!r){
+			return 0;
+		}
 	}
+	return 1;
 }
 
 #ifdef USE_AOIDS

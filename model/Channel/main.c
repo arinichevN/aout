@@ -1,8 +1,9 @@
 #include "main.h"
 
+static void channel_INIT(Channel *self);
 static void channel_RUN(Channel *self);
 static void channel_OFF(Channel *self);
-static void channel_INIT(Channel *self);
+static void channel_FAILURE(Channel *self);
 
 state_t channel_getState(Channel *self){
 	if(self->control == channel_OFF) {
@@ -11,6 +12,8 @@ state_t channel_getState(Channel *self){
 		return STATE_RUN;
 	} else if(self->control == channel_INIT) {
 		return STATE_INIT;
+	} else if(self->control == channel_FAILURE) {
+		return STATE_FAILURE;
 	}
 	return STATE_UNKNOWN;
 }
@@ -37,8 +40,7 @@ static err_t channel_setParam(Channel *self, size_t ind){
 	self->id = param.id;
 	self->pin = param.pin;
 	self->device_kind = param.device_kind;
-	idev_begin(&self->idev);
-	self->device = &self->idev.im_device;
+	self->device = NULL;
 	switch(self->device_kind){
 		case DEVICE_KIND_HPWM:{
 			Hpwm *device = hpwm_new();
@@ -56,20 +58,26 @@ static err_t channel_setParam(Channel *self, size_t ind){
 				self->device = &device->im_device;
 			}}
 			break;
-		default:
+		default:{
+			IdleDevice *device = idev_new();
+			if(device != NULL){
+				self->device = &device->im_device;
+			}}
+			self->device_kind = DEVICE_KIND_UNKNOWN;
 			return ERROR_DEVICE_KIND;
 	}
 	secure_setParam(&self->secure, &param.secure);
 	return ERROR_NO;
 }
 
-void channel_begin(Channel *self, size_t ind){
+int channel_begin(Channel *self, size_t ind){
 	printd("beginning channel ");printd(ind); printdln(":");
 	channel_buildInterfaces(self);
 	self->error_id = channel_setParam(self, ind);
 	self->control = channel_INIT;
 	printd("\tid: ");printdln(self->id);
 	printd("\n");
+	return 1;
 }
 
 
@@ -90,9 +98,11 @@ int channel_start(Channel *self){
 
 int channel_stop(Channel *self){
 	printd("stopping channel ");printdln(self->ind);
-	self->device->stop(self->device->self);
-	self->goal = self->device->getInitialGoal(self->device->self);
-	secure_stop(&self->secure);
+	if(self->control != channel_FAILURE){
+		self->device->stop(self->device->self);
+		self->goal = self->device->getInitialGoal(self->device->self);
+		secure_stop(&self->secure);
+	}
 	self->error_id = ERROR_NO;
 	self->control = channel_OFF;
 	return 1;
@@ -100,9 +110,11 @@ int channel_stop(Channel *self){
 
 int channel_disconnect(Channel *self){
 	printd("disconnecting channel ");printdln(self->ind);
-	self->device->stop(self->device->self);
-	self->goal = self->device->getInitialGoal(self->device->self);
-	secure_stop(&self->secure);
+	if(self->control != channel_FAILURE){
+		self->device->stop(self->device->self);
+		self->goal = self->device->getInitialGoal(self->device->self);
+		secure_stop(&self->secure);
+	}
 	self->error_id = ERROR_NO;
 	self->control = channel_OFF;
 	return 1;
@@ -110,10 +122,12 @@ int channel_disconnect(Channel *self){
 
 int channel_reset(Channel *self){
 	printd("restarting channel ");printd(self->ind); printdln(":");
-	self->device->stop(self->device->self);
-	self->goal = self->device->getInitialGoal(self->device->self);
-	secure_stop(&self->secure);
-	channel_free(self);
+	if(self->control != channel_FAILURE){
+		self->device->stop(self->device->self);
+		self->goal = self->device->getInitialGoal(self->device->self);
+		secure_stop(&self->secure);
+		channel_free(self);
+	}
 	channel_begin(self, self->ind);
 	return 1;
 }
@@ -124,11 +138,20 @@ static void channel_RUN(Channel *self){
 	self->device->control(self->device->self, self->goal);
 }
 
+static void channel_FAILURE(Channel *self){
+	;
+}
+
 static void channel_OFF(Channel *self){
 	;
 }
 
 static void channel_INIT(Channel *self){
+	if(self->device == NULL){
+		self->goal = 0.0;
+		self->control = channel_FAILURE;
+		return;
+	}
 	self->device->begin(self->device->self);
 	secure_begin(&self->secure);
 	self->goal = self->device->getInitialGoal(self->device->self);
