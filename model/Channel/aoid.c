@@ -16,8 +16,11 @@ static void channel_serveAoidRequestSelf(void *vself, Aoid *oid, void *vserver, 
 			channel_reset(self);
 			acpls_reset(server);
 			return;
-		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED:
-			aoidServer_sendSupportedSSR(oid, server);
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_NEXT:
+			aoidServer_sendSupportedNextSSR(oid, server);
+			return;
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_FIRST:
+			aoidServer_sendSupportedFirstSSR(oid, server);
 			return;
 	}
 	acpls_reset(server);
@@ -26,8 +29,11 @@ static void channel_serveAoidRequestSelf(void *vself, Aoid *oid, void *vserver, 
 static void channel_serveRequestNone(void *vself, Aoid *oid, void *vserver, int command) {
 	Acpls *server = (Acpls *) vserver;
 	switch(command){
-		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED:
-			aoidServer_sendSupportedNone(oid, server);
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_NEXT:
+			aoidServer_sendSupportedNextNone(oid, server);
+			return;
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_FIRST:
+			aoidServer_sendSupportedFirstNone(oid, server);
 			return;
 	}
 	acpls_reset(server);
@@ -66,8 +72,11 @@ static void channel_serveAoidRequestGGS(void *vself, Aoid *oid, void *vserver, i
 			}
 			acpls_reset(server);
 			return;
-		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED:
-			aoidServer_sendSupportedGGS(oid, server);
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_NEXT:
+			aoidServer_sendSupportedNextGGS(oid, server);
+			return;
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_FIRST:
+			aoidServer_sendSupportedFirstGGS(oid, server);
 			return;
 	}
 	acpls_reset(server);
@@ -174,12 +183,12 @@ void secureAoid_build(SecureAoid *self,  Aoid *next, Aoid *parent, void *vchanne
 }
 
 void channelAoid_build(ChannelAoid *self, Aoid *next, Aoid *parent, void *vchannel, size_t *id){
-	//OBJE_ID_SET_PARAM(OID, 					NEXT,						PARENT,			KIND,							DESCR,									FUNCTION, 								DATA,		ID)
-	AOID_SET_PARAM(&self->main,					&self->id,					parent,			AOID_KIND_COMPLEX,				AOID_DESCRIPTION_CHANNEL,				channel_serveAoidRequestSelf,			vchannel,	*id)
-	AOID_SET_PARAM(&self->id,					&self->pin,					&self->main,	AOID_KIND_ID_PARAM,				AOID_DESCRIPTION_ID,					channel_serveAoidRequestId,				vchannel,	*id)
-	AOID_SET_PARAM(&self->pin,					&self->device_kind,			&self->main,	AOID_KIND_UINT8_PARAM,			AOID_DESCRIPTION_PIN,					channel_serveAoidRequestPin,			vchannel,	*id)
-	AOID_SET_PARAM(&self->device_kind,			&self->hpwm.main,			&self->main,	AOID_KIND_DEVICE_KIND_PARAM,	AOID_DESCRIPTION_DEVICE_KIND,			channel_serveAoidRequestDeviceKind,		vchannel,	*id)
-	hpwmAoid_build(&self->hpwm,					&self->spwm.main, 			&self->main,																													vchannel,	id);
-	spwmAoid_build(&self->spwm, 				&self->secure.main,			&self->main,																													vchannel,	id);
-	secureAoid_build(&self->secure, 			next, 						&self->main,																													vchannel,	id);
+	//OBJE_ID_SET_PARAM(OID, 					NEXT,						PARENT,			KIND,										DESCR,									FUNCTION, 								DATA,		ID)
+	AOID_SET_PARAM(&self->main,					&self->id,					parent,			AOID_KIND_COMPLEX,							AOID_DESCRIPTION_CHANNEL,				channel_serveAoidRequestSelf,			vchannel,	*id)
+	AOID_SET_PARAM(&self->id,					&self->pin,					&self->main,	AOID_KIND_ID_PARAM,							AOID_DESCRIPTION_ID,					channel_serveAoidRequestId,				vchannel,	*id)
+	AOID_SET_PARAM(&self->pin,					&self->device_kind,			&self->main,	AOID_KIND_UINT8_PARAM,						AOID_DESCRIPTION_PIN,					channel_serveAoidRequestPin,			vchannel,	*id)
+	AOID_SET_PARAM(&self->device_kind,			&self->hpwm.main,			&self->main,	AOID_KIND_AOUT_CHANNEL_DEVICE_KIND_PARAM,	AOID_DESCRIPTION_DEVICE_KIND,			channel_serveAoidRequestDeviceKind,		vchannel,	*id)
+	hpwmAoid_build(&self->hpwm,					&self->spwm.main, 			&self->main,																																vchannel,	id);
+	spwmAoid_build(&self->spwm, 				&self->secure.main,			&self->main,																																vchannel,	id);
+	secureAoid_build(&self->secure, 			next, 						&self->main,																																vchannel,	id);
 }

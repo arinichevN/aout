@@ -68,7 +68,7 @@ void app_RUN(){
 void app_uploadDelay(){
 	pinMode(INDICATOR_PIN, OUTPUT);
 	digitalWrite(INDICATOR_PIN, HIGH);
-	delay(5000);
+	delay(APP_UPLOAD_DELAY_MS);
 	digitalWrite(INDICATOR_PIN, LOW);
 }
 
@@ -123,6 +123,7 @@ void app_begin(){
 	app_uploadDelay();
 	pinMode(DEFAULT_CONTROL_PIN, INPUT_PULLUP);
 	int default_btn = digitalRead(DEFAULT_CONTROL_PIN);
+	//int default_btn = BUTTON_DOWN;
 	appei_begin(INDICATOR_PIN);
 	if(!pmem_checkSize()){
 		app_error_id = ERROR_NVRAM;
@@ -134,26 +135,26 @@ void app_begin(){
 		app_error_id = ERROR_PARAM;
 		goto err;
 	}
-	delay(300);
+	//delay(300);
 	if(!serials_begin(default_btn)){
 		app_error_id = ERROR_SERIAL;
 		goto err;
 	}
 	printdln("serials OK");
-	delay(300);
+	//delay(300);
 	if(!channels_begin(default_btn)){
 		app_error_id = ERROR_CHANNELS;
 		goto err;
 	}
 	printdln("channels OK");
-	delay(300);
+	//delay(300);
 #ifdef USE_AOIDS
 	if(!aoids_begin()){
 		app_error_id = ERROR_AOID;
 		goto err;
 	}
 	printdln("aoids OK");
-	delay(300);
+	//delay(300);
 #endif
 #ifdef USE_NOIDS
 	if(!noids_begin(default_btn)){
@@ -161,7 +162,7 @@ void app_begin(){
 		goto err;
 	}
 	printdln("noids OK");
-	delay(300);
+	//delay(300);
 #endif
 	app_control = app_RUN;
 	printdln("app started");

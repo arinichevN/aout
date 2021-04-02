@@ -26,8 +26,11 @@ static void channelLList_serveAoidRequestSelf(void *vself, Aoid *oid, void *vser
 	//ChannelLList *self = (ChannelLList *) vself;
 	Acpls *server = (Acpls *) vserver;
 	switch(command){
-		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED:
-			aoidServer_sendSupportedNone(oid, server);
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_NEXT:
+			aoidServer_sendSupportedNextNone(oid, server);
+			return;
+		case CMD_AOID_GET_ACP_COMMAND_SUPPORTED_FIRST:
+			aoidServer_sendSupportedFirstNone(oid, server);
 			return;
 	}
 	acpls_reset(server);
