@@ -123,14 +123,16 @@ void acnf_noidExists(Acpls *server, int command){
 	int id;
 	if(acp_packGetCellI(server->acpl->buf, NOID_ACP_REQUEST_IND_ID, &id)){
 		if(id == NOID_ID_BROADCAST){
+			printd(id); printdln(" is broadcast");
 			goto found;
 		}
 		FOREACH_APP_NOID{
-			if(id == *oid->id){
+			if(id == *oid->id && oid->kind != NOID_KIND_EXTERN){
+				printd(id); printdln(" is NOID");
 				goto found;
 			}
 		}
-		printdln("\tOID not found");
+		printd(id); printdln(" not found");
 		acpls_reset(server);
 		return;
 
